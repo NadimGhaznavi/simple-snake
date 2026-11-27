@@ -8,6 +8,8 @@ classes: wide
 author_profile: true
 ---
 
+First set up a source environment using the [getting-started guide]({{ site.baseurl }}{% link pages/getting-started.md %}). You can experiment with learning constants using the [AI experiments guide]({{ site.baseurl }}{% link pages/experiments.md %}), or explore the implementation and tests below.
+
 See [architecture]({{ site.baseurl }}{% link pages/architecture.md %}) for the module map and learning flow.
 No application module imports BMForge or the reference project at runtime.
 The ignored `loeber-snake` directory is **read-only reference material**.

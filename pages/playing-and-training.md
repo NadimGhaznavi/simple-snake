@@ -1,5 +1,5 @@
 ---
-title: "Controls and training"
+title: "Play and train"
 lang: en
 locale: en-US
 language_name: English
@@ -8,27 +8,45 @@ classes: wide
 author_profile: true
 ---
 
-- Choose **Play yourself** or **Train AI**, then press **Start**.
-- Steer with the arrow keys or WASD. An immediate reversal is ignored.
-- **Pause** or Space pauses/resumes. Change **Speed** to control steps per second.
-- **New session** or changing mode stops the worker and clears the board and chart.
-- The chart shows each completed AI game's score and the cumulative mean.
+## Play yourself
 
-Each AI session starts a fresh network and replay memory. A new positive
-record saves model weights to the path displayed below the board. On Linux
-this normally falls under `~/.local/share/BMForge/SimpleSnake`; on Windows it
-uses Qt's per-user application-data location. A new session can replace the
-previous session's checkpoint when it sets its first positive record.
-Checkpoints contain weights only: loading/resuming a saved training session
-is not implemented.
+Choose **Play yourself**, press **Start**, and guide the snake towards the food. Each piece of food adds one point and makes the snake longer. Hitting a wall or your own body ends the game; filling the board wins.
 
-The port retains the reference's 11 observations, 11→256→3 network, relative
-actions, epsilon schedule, replay limit/batch size, learning rate, discount,
-rewards, and total-step starvation rule for AI games. Human games have no
-starvation limit. Q-learning targets are detached from autograd, and a full
-board ends as a win. Learning is stochastic; short runs are not evidence of
-convergence. The GUI remains responsive while individual and replay training
-steps run in a worker thread.
+| Control | What it does |
+| --- | --- |
+| Arrow keys or WASD | Steer in human mode. Immediate reversal is ignored. |
+| Start / Pause / Resume | Start or pause the current game or AI training. |
+| Space | Start, pause or resume. |
+| Speed | Limit moves per second (1–120; default 40). Lower it for easier human play. |
+| New session | Stop and reset the current game or training, including chart and statistics. |
+| Mode | Switch between human play and AI training; switching resets the session. |
+
+## Train the AI
+
+1. Choose **Train AI** and press **Start**.
+2. Watch the snake play. It automatically begins another game after each game ends.
+3. Increase Speed to spend less time watching individual moves or lower it to study the snake's choices.
+4. Let it play many games before judging it. Early games can be short, and even after training it can still make mistakes.
+
+Speed changes the pace of the simulation, not the neural network's learning rate. Actual speed depends on your computer.
+
+## Read the chart
+
+**Score** is the number of food items collected in a game. **Games** counts completed AI games. **Record** is the best completed AI score in this session (or the current best score in human mode). **Mean** is the average score over all completed AI games.
+
+The chart plots individual completed-game scores and their cumulative mean. A single spike may be luck; a rising mean across many games suggests improving performance. The cumulative mean includes early games and may react slowly to later changes. The chart does not plot training loss or rewards.
+
+## What is it learning?
+
+The AI gets a reward of +10 for food, -10 for a collision or exceeding its move budget, and 0 for a normal move. It tries to predict the future value of each possible action using a neural network. At first it sometimes chooses randomly; that exploration decreases as the number of completed games rises. The AI also learns from remembered moves.
+
+Each AI session begins with a fresh network and replay memory. Pause preserves them; **New session** and mode changes discard them. When a positive record is set, the app saves network weights at the path shown below the board (normally under `~/.local/share/BMForge/SimpleSnake` on Linux and Qt's per-user application-data directory on Windows).
+
+The first positive record in a new session can overwrite a previous session's weights. Checkpoints contain weights only, and loading or resuming them is not implemented. Save screenshots or copy the checkpoint separately if you want to preserve an interesting result.
+
+AI games also have a total-move cutoff that grows with snake length; human games do not.
+
+Ready to change the rules of learning? See [AI experiments]({{ site.baseurl }}{% link pages/experiments.md %}).
 
 ---
 

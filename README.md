@@ -1,3 +1,5 @@
-# simple-snake
+# Simple Snake
 
-A simple AI Snake Game implementation. See [website](https://simplesnake.osoyalce.com) for project information.
+Play the classic Snake game, train a small neural network to play it, and experiment with how the AI learns.
+
+Visit the [Simple Snake website](https://simplesnake.osoyalce.com) for Windows and Linux setup, controls and AI experiments.

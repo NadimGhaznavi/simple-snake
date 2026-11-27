@@ -9,6 +9,10 @@ classes: wide
 author_profile: true
 ---
 
+The AI has a surprisingly small brain: 11 inputs, one hidden layer of 256 neurons with a ReLU activation, and three outputs predicting the value of moving straight, turning right or turning left. It learns by updating those predictions using rewards and future value estimates.
+
+If you want to try changing the brain or its rewards first, start with [AI experiments]({{ site.baseurl }}{% link pages/experiments.md %}). The rest of this page explains the implementation.
+
 The application uses BMForge's Activity / Interface / Entity responsibilities.
 Each substantial class has its own module. There is no runtime framework
 beyond Qt, Matplotlib, NumPy, and PyTorch.
@@ -79,7 +83,7 @@ the canonical CMDB constants remain readable in either deployment.
 
 There are no services, listeners, databases, hidden production changes, or
 automatic releases. The source-file installer is not a frozen executable or
-MSI package. Native Windows platform integration will be validated in the VM.
+MSI package. Native Windows desktop validation remains pending.
 
 ---
 
