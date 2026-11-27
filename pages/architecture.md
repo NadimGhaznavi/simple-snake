@@ -15,7 +15,7 @@ If you want to try changing the brain or its rewards first, start with [AI exper
 
 The application uses BMForge's Activity / Interface / Entity responsibilities.
 Each substantial class has its own module. There is no runtime framework
-beyond Qt, Matplotlib, NumPy, and PyTorch.
+beyond Qt, Plotly.js, NumPy, and PyTorch.
 
 | Package | Owns |
 | --- | --- |
@@ -41,7 +41,7 @@ beyond Qt, Matplotlib, NumPy, and PyTorch.
    it also trains on up to 1,000 replay transitions, increments its game count,
    and the session updates score statistics and saves a new record's weights.
 6. The worker emits an immutable snapshot. `MainWindow` paints that snapshot;
-   it appends to the Matplotlib chart only on a completed game.
+   it appends to the embedded Plotly.js chart only on a completed game.
 
 `QTrainer` computes reward + discount × max(next Q) for live transitions and
 reward alone for terminal transitions. Its target is detached. The mean square
@@ -50,7 +50,8 @@ action's target differs from the current prediction.
 
 ## Thread ownership and shutdown
 
-All widgets and Matplotlib operations stay on the Qt GUI thread. The worker
+All widgets and browser bridge calls stay on the Qt GUI thread. Plotly renders
+inside Qt WebEngine's browser process. The worker
 owns its model, optimizer, replay memory, and game. Its condition variable
 protects pause, speed, and stop flags; the UI never shares mutable learning
 state. A pause may allow the move already in flight to finish. Speed is an
@@ -66,9 +67,33 @@ Human play uses a GUI `QTimer` and the same rules. Only the latest legal
 direction is applied per tick, so rapid keypresses cannot reverse into the
 snake between ticks. The starvation cutoff is disabled in human mode.
 
+## Training chart
+
+The chart uses **Plotly.js 4.1.1**, following the pinned BMForge visualization
+component 0.1.0. This project's approved desktop adaptation embeds the chart
+in `QWebEngineView` rather than an HTTP display server and bundles the exact
+JavaScript asset locally rather than loading BMForge's CDN URL. The application
+has no HTTP listener and charts work offline. PySide6 already supplies Qt
+WebEngine and Qt WebChannel; the Python `plotly` package is not used.
+
+`TrainingChart` owns the score/mean history. Qt WebChannel reports browser
+readiness and rendering failures; JSON transfers localized labels and data
+to the page. Games completed before the initial render are retained, and
+browser updates run in order so resets cannot race with earlier appends.
+New points extend the two existing traces and preserve zoom and legend
+choices. A new session clears the traces and restores automatic axes.
+Labels are escaped before Plotly renders them. Load/render errors appear in
+the chart area, and installation verifies the initial browser render.
+
+The packaged assets and Plotly MIT license live in `simplesnake/assets`.
+The project-specific specification in `docs/visualization.md` records asset
+provenance and the approved adaptations without changing the pinned BMForge
+skill snapshot.
+
 ## Portability and ownership
 
-UI assets use Qt painting and system fonts. Resource paths derive from the
+The board uses Qt painting and system fonts; the chart uses bundled browser
+assets and system fonts. Resource paths derive from the
 package directory; writable model paths come from `QStandardPaths`. The app
 does not depend on the working directory, Pygame, IPython, a bundled font, or
 anything in the ignored reference checkout.

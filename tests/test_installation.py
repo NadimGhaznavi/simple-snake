@@ -10,6 +10,7 @@ from unittest.mock import patch
 import zipfile
 
 from scripts import install as installer
+from simplesnake.constants.DSimpleSnake import DSimpleSnake
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,8 +47,9 @@ class InstallationTests(unittest.TestCase):
         (self.source / 'scripts').mkdir(parents=True)
         (self.source / 'simplesnake/constants').mkdir(parents=True)
         shutil.copyfile(ROOT / 'scripts/check-cmdb.py', self.source / 'scripts/check-cmdb.py')
-        shutil.copyfile(ROOT / 'simplesnake/constants/DSimpleSnake.py',
-                        self.source / 'simplesnake/constants/DSimpleSnake.py')
+        constants = (ROOT / 'simplesnake/constants/DSimpleSnake.py').read_text()
+        (self.source / 'simplesnake/constants/DSimpleSnake.py').write_text(
+            constants.replace(f'"{DSimpleSnake.VERSION}"', '"0.0.0"'))
         (self.source / 'simplesnake/__init__.py').write_text('')
         self.wheel = make_wheel(self.base, '1.0')
         self.requirements = self.source / 'requirements.txt'

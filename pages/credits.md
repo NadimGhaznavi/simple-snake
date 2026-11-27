@@ -16,6 +16,12 @@ The Qt presentation and application structure are maintained by this project.
 The original MIT notice is reproduced below. The project license is in
 [LICENSE](https://github.com/{{ site.repository }}/blob/main/LICENSE).
 
+## Plotly.js 4.1.1 (MIT)
+
+The training chart bundles Plotly.js 4.1.1 for offline use. Its MIT license
+and bundled third-party notices are included with the application. See the
+[bundled license](https://github.com/{{ site.repository }}/blob/main/simplesnake/assets/plotly-LICENSE).
+
 ## Dedication
 
 This project is dedicated to my daughter Madeline, who inspired me to create a simple snake game for her to play with. I hope she enjoys it and learns from it.

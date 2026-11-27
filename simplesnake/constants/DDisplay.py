@@ -15,4 +15,3 @@ class DDisplay:
     HEAD: Final[str] = "#7cc6ff"
     FOOD: Final[str] = "#ed6565"
     CELL_INSET: Final[float] = 0.08
-    CHART_DPI: Final[int] = 100

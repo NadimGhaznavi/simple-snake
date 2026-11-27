@@ -36,6 +36,11 @@ Speed changes the pace of the simulation, not the neural network's learning rate
 
 The chart plots individual completed-game scores and their cumulative mean. A single spike may be luck; a rising mean across many games suggests improving performance. The cumulative mean includes early games and may react slowly to later changes. The chart does not plot training loss or rewards.
 
+Hover over a line to inspect values. Drag to zoom, use the chart toolbar to
+pan or restore the axes, and click a legend entry to hide or show that line.
+Zoom and line visibility stay in place as training continues; **New session**
+restores the chart's initial view. The chart works without an internet connection.
+
 ## What is it learning?
 
 The AI gets a reward of +10 for food, -10 for a collision or exceeding its move budget, and 0 for a normal move. It tries to predict the future value of each possible action using a neural network. At first it sometimes chooses randomly; that exploration decreases as the number of completed games rises. The AI also learns from remembered moves.
