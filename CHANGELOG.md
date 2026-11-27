@@ -10,6 +10,8 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-27 @ 03:30
+
 ### Summary
 
 Restore the BMForge documentation configuration while preserving the existing page content and URLs.
