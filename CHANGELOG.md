@@ -10,6 +10,8 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-27 @ 03:57
+
 ### Summary
 
 Make the training chart interactive with an offline Plotly.js view embedded in the desktop window.
