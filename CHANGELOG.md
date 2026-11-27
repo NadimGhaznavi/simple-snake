@@ -10,6 +10,17 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-27 @ 05:19
+
+### Summary
+
+Fix launching the installed Windows game from the extracted source folder.
+
+### Fixed
+
+- Let `run.cmd` find the default per-user installation when the source has no virtual environment, retain local source and custom installation launches, and explain how to recover when no runtime exists.
+- Add Windows launcher regression coverage for runtime selection, paths and arguments containing spaces, missing runtimes, and application exit codes.
+
 ## [0.4.1] - 2026-11-27 @ 05:11
 
 ### Summary
