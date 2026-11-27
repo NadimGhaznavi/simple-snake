@@ -10,6 +10,8 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-27 @ 05:11
+
 ### Summary
 
 Check the Windows C++ runtime before installation and explain how to recover from PyTorch DLL loading failures.
