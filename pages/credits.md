@@ -20,7 +20,7 @@ The original MIT notice is reproduced below. The project license is in
 
 This project is dedicated to my daughter Madeline, who inspired me to create a simple snake game for her to play with. I hope she enjoys it and learns from it.
 
-![Madeline and Me](/pages/images/madeline.jpg)
+![Madeline and Me]({{ '/pages/images/madeline.jpg' | relative_url }})
 
 ## Patrick Loeber's Snake AI (MIT)
 

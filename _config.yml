@@ -1,3 +1,4 @@
+# BMFORGE_COMPONENT: bmforge.github-pages; spec_version: 0.1.0
 # Welcome to Jekyll!
 #
 # This config file is meant for settings that affect your entire site, values
@@ -23,7 +24,9 @@ minimal_mistakes_skin: "dark"
 mycount:
   endpoint: "https://count.osoyalce.com/count"
   site: "simplesnake"
-
+multilingual:
+  enabled: true
+  default_lang: en
 
 # Site Settings
 locale: "en-US"
@@ -164,6 +167,20 @@ include:
   - .htaccess
   - pages
 exclude:
+  - AGENTS.md
+  - README.md
+  - scripts
+  - tests
+  - templates
+  - components
+  - skills
+  - simplesnake
+  - requirements.txt
+  - pyproject.toml
+  - build
+  - simple_snake.egg-info
+  - loeber-snake
+  - Gemfile.lock
   - "*.sublime-project"
   - "*.sublime-workspace"
   - vendor
@@ -301,12 +318,21 @@ compress_html:
 
 # Defaults
 defaults:
+  # Documentation pages, including future translations.
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      classes: wide
+      author_profile: true
   # _posts
   - scope:
       path: ""
       type: posts
     values:
       layout: single
+      classes: wide
       author_profile: true
       read_time: false
       comments: # true
