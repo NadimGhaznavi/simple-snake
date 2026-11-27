@@ -2,6 +2,7 @@ from typing import Final
 
 
 class DSimpleSnake:
+    # Release and installation tools read these literal values without importing us.
     VERSION: Final[str] = "0.3.0"
     CMDB_TYPE: Final[str] = "application"
     CMDB_SUBTYPE: Final[str] = "Application"

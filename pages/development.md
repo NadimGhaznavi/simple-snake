@@ -34,6 +34,12 @@ pause/reset/shutdown, and install/upgrade/uninstall using real offline wheel
 fixtures. Linux offscreen tests exercise Qt behavior, but native Windows
 desktop validation remains to be done on the Windows VM.
 
+The Python compatibility workflow runs these tests on Windows x86-64 with
+Python 3.15. It also installs the package metadata, checks the Windows
+launcher, and exercises a deployed install, upgrade, and uninstall with the
+real application dependencies. These offscreen checks complement manual
+Windows desktop testing.
+
 The Qt tests select software rendering for headless execution. Qt WebEngine
 still starts Chromium's sandboxed renderer processes, so run them on a host
 that permits those subprocesses and their IPC.

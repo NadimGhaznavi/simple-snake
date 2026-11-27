@@ -8,6 +8,8 @@ from simplesnake.entity.Point import Point
 
 class GameTests(unittest.TestCase):
     def setUp(self):
+        # unittest calls setUp before every test; a seed makes food placement repeatable.
+        # https://docs.python.org/3/library/unittest.html#unittest.TestCase.setUp
         self.game = SnakeGame(rng=random.Random(7))
 
     def test_reset_and_snapshot_are_independent(self):
@@ -22,6 +24,7 @@ class GameTests(unittest.TestCase):
     def test_relative_turns_for_all_directions(self):
         for direction in DDirection:
             for action, turn in ((DAction.STRAIGHT, 0), (DAction.RIGHT, 1), (DAction.LEFT, -1)):
+                # subTest identifies which direction/action pair failed.
                 with self.subTest(direction=direction, action=action):
                     self.game.reset()
                     self.game.snake = [Point(10, 10)]
@@ -45,6 +48,8 @@ class GameTests(unittest.TestCase):
         result = self.game.step()
         self.assertTrue(result.done)
         self.assertEqual(result.reward, DGame.DEATH_REWARD)
+        # The block must raise this exception for the assertion to pass.
+        # https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertRaises
         with self.assertRaises(RuntimeError):
             self.game.step()
         self.game.reset()

@@ -1,0 +1,59 @@
+name: Python compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-python-315:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      QTWEBENGINE_CHROMIUM_FLAGS: --disable-gpu
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.15'
+          architecture: x64
+      - name: Create the source environment and install Windows wheels
+        run: |
+          python -m venv .venv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .venv\Scripts\python.exe -m pip install --only-binary=:all: -r requirements.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .venv\Scripts\python.exe -m pip install --no-deps .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .venv\Scripts\python.exe -m pip check
+      - name: Verify the Windows launcher
+        run: .\scripts\run.cmd --version
+      - name: Run game, training, Qt, and installation tests
+        run: .venv\Scripts\python.exe -m unittest discover -v
+      - name: Check and install a deployed copy with Python 3.15
+        run: |
+          $destination = Join-Path $env:RUNNER_TEMP 'Simple Snake'
+          python scripts/install.py install --destination $destination --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/install.py install --destination $destination
+      - name: Verify the deployed launcher and upgrade
+        run: |
+          $destination = Join-Path $env:RUNNER_TEMP 'Simple Snake'
+          & "$destination\scripts\run.cmd" --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/install.py upgrade --destination $destination
+      - name: Uninstall the deployed copy
+        if: always()
+        run: |
+          $destination = Join-Path $env:RUNNER_TEMP 'Simple Snake'
+          if (Test-Path "$destination\.installation-manifest.json") {
+            python scripts/install.py uninstall --destination $destination
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }

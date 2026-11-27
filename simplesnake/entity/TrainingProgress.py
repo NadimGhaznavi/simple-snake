@@ -5,6 +5,7 @@ from simplesnake.entity.GameState import GameState
 
 @dataclass(frozen=True)
 class TrainingProgress:
+    # A snapshot carries results from the learning thread to the window.
     game: GameState
     games: int
     record: int

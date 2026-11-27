@@ -41,6 +41,7 @@ class TrainingTests(unittest.TestCase):
 
     def test_network_dimensions_and_greedy_action(self):
         agent = Agent(rng=random.Random(3))
+        # Disable exploration so the action must match the network's highest value.
         agent.games = DTraining.EXPLORATION_GAMES
         state = Agent.observe(SnakeGame())
         self.assertEqual(agent.model(torch.as_tensor(state)).shape, (DTraining.ACTION_COUNT,))
@@ -59,6 +60,7 @@ class TrainingTests(unittest.TestCase):
             targets[1, 2] = rewards[1]
         expected = torch.mean((model(torch.as_tensor(states)) - targets) ** 2)
         expected.backward()
+        # Compare actual gradients to an independently calculated learning target.
         expected_gradients = [p.grad.clone() for p in model.parameters()]
         trainer.optimizer.zero_grad()
         loss = trainer.train(states, actions, rewards, next_states, dones)
@@ -67,9 +69,12 @@ class TrainingTests(unittest.TestCase):
             torch.testing.assert_close(parameter.grad, gradient)
 
     def test_session_replay_checkpoint_and_next_episode(self):
+        # TemporaryDirectory removes checkpoints automatically when the block exits.
+        # https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryDirectory
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'best-model.pth'
             session = TrainingSession(path)
+            # Replace random/learned decisions with a predictable straight-line game.
             session.agent.choose_action = lambda state: DAction.STRAIGHT
             session.game.food = session.game.next_point(session.game.direction)
             first = session.step()

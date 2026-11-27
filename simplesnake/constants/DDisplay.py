@@ -2,6 +2,7 @@ from typing import Final
 
 
 class DDisplay:
+    # Window sizes use pixels; speed is moves per second, converted for Qt timers.
     WINDOW_WIDTH: Final[int] = 1120
     WINDOW_HEIGHT: Final[int] = 650
     BOARD_MIN_WIDTH: Final[int] = 320

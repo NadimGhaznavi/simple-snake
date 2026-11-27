@@ -29,14 +29,18 @@ def validate(source: str, name: str, pathname: str, codename: str | None = None,
     expected = f"{name.lower()}/constants/D{name}.py"
     if pathname != expected:
         raise ValueError(f"Constants path must be {expected}")
+    # An AST is a tree of Python syntax: inspect assignments without running the file.
+    # https://docs.python.org/3/library/ast.html#ast.parse
     statements = list(ast.parse(source).body)
     assignments = {}
     for node in statements:
         if isinstance(node, ast.ClassDef):
+            # Appending class bodies lets this loop also inspect their assignments.
             statements.extend(node.body)
         if isinstance(node, ast.Assign):
             targets, value = node.targets, node.value
         elif isinstance(node, ast.AnnAssign):
+            # Annotated assignments include a type hint, as in VERSION: Final[str].
             targets, value = [node.target], node.value
         else:
             continue
@@ -66,6 +70,8 @@ def validate(source: str, name: str, pathname: str, codename: str | None = None,
     for field, limit in (("CMDB_COMPONENTS", 4096), ("CMDB_DATABASES", 64)):
         if field not in assignments:
             continue
+        # literal_eval reads literal containers and values without executing calls.
+        # https://docs.python.org/3/library/ast.html#ast.literal_eval
         declarations = ast.literal_eval(assignments[field])
         if not isinstance(declarations, (tuple, list)):
             raise ValueError(f"{field} must be a literal tuple or list of pairs")
@@ -95,6 +101,8 @@ def validate(source: str, name: str, pathname: str, codename: str | None = None,
             try:
                 IPv4Address(interface)
             except ValueError as error:
+                # Keep the original exception as the cause of our clearer message.
+                # https://docs.python.org/3/tutorial/errors.html#exception-chaining
                 raise ValueError("CMDB_NETWORK interface must be an IPv4 address string") from error
             if type(port) is not int or not 1 <= port <= 65535:
                 raise ValueError("CMDB_NETWORK port must be an integer from 1 to 65535")
