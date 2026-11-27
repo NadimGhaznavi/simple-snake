@@ -7,6 +7,14 @@ The Qt presentation and application structure are maintained by this project.
 The original MIT notice is reproduced below. The project license is in
 [LICENSE](LICENSE).
 
+## Plotly.js 4.1.1 (MIT)
+
+The offline training chart bundles the unmodified
+[Plotly.js 4.1.1 distribution](https://cdn.plot.ly/plotly-4.1.1.min.js)
+in `simplesnake/assets/plotly-4.1.1.min.js`. Its accompanying MIT license is
+included in [plotly-LICENSE](simplesnake/assets/plotly-LICENSE).
+The distribution retains its bundled third-party notices.
+
 ## Patrick Loeber's Snake AI (MIT)
 
 MIT License

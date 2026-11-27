@@ -29,9 +29,14 @@ $env:QT_QPA_PLATFORM = "offscreen"
 ```
 
 Tests cover game rules, training math, model saves, localization, Qt controls,
+offline browser chart rendering, zoom/legend persistence, chart reset/resize,
 pause/reset/shutdown, and install/upgrade/uninstall using real offline wheel
 fixtures. Linux offscreen tests exercise Qt behavior, but native Windows
 desktop validation remains to be done on the Windows VM.
+
+The Qt tests select software rendering for headless execution. Qt WebEngine
+still starts Chromium's sandboxed renderer processes, so run them on a host
+that permits those subprocesses and their IPC.
 
 The upstream attribution and MIT notice are preserved in
 [third-party notices]({{ site.baseurl }}{% link pages/credits.md %}). This project retains its

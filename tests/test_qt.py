@@ -1,6 +1,9 @@
 import os
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
+os.environ.setdefault('QT_QUICK_BACKEND', 'software')
+os.environ.setdefault('QTWEBENGINE_CHROMIUM_FLAGS', '--disable-gpu')
 
+import json
 from pathlib import Path
 import tempfile
 from time import monotonic
@@ -12,8 +15,10 @@ from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
 from simplesnake.constants.DGame import DAction, DDirection
+from simplesnake.constants.DChart import DChart
 from simplesnake.interface.Localizer import Localizer
 from simplesnake.interface.MainWindow import MainWindow
+from simplesnake.interface.TrainingChart import TrainingChart
 from simplesnake.interface.TrainingWorker import TrainingWorker
 
 
@@ -47,6 +52,90 @@ class QtTests(unittest.TestCase):
         self.window.close()
         APP.processEvents()
         self.directory.cleanup()
+
+    def javascript(self, expression):
+        results = []
+        self.window.chart.view.page().runJavaScript(
+            f'JSON.stringify({expression})', results.append)
+        self.assertTrue(wait_until(lambda: bool(results)))
+        return json.loads(results[0])
+
+    def chart_ready(self):
+        chart = self.window.chart
+        self.assertTrue(wait_until(lambda: chart.ready or chart.error,
+                                   timeout=DChart.READY_TIMEOUT_MS + 1000))
+        self.assertIsNone(chart.error)
+        self.assertTrue(chart.ready)
+
+    def test_offline_chart_buffers_before_load_and_renders_both_lines(self):
+        chart = self.window.chart
+        chart.append(9, 9)
+        chart.reset()
+        chart.append(2, 2)
+        chart.append(6, 4)
+        self.chart_ready()
+        rendered = self.javascript('''({
+            version: Plotly.version,
+            traces: document.getElementById('chart').data,
+            title: document.querySelector('.gtitle').textContent,
+            paths: document.querySelectorAll('.scatterlayer .js-line').length,
+            resources: performance.getEntriesByType('resource').map(entry => entry.name)
+        })''')
+        self.assertEqual(rendered['version'], DChart.PLOTLY_VERSION)
+        score, mean = rendered['traces']
+        self.assertEqual(score['x'], [1, 2])
+        self.assertEqual(score['y'], [2, 6])
+        self.assertEqual(mean['y'], [2, 4])
+        self.assertEqual([score['name'], mean['name']], ['Score', 'Mean score'])
+        self.assertEqual(rendered['title'], 'Training progress')
+        self.assertEqual(rendered['paths'], 2)
+        self.assertTrue(all(url.startswith(('file:', 'qrc:'))
+                            for url in rendered['resources']))
+
+    def test_chart_zoom_legend_reset_and_resize(self):
+        chart = self.window.chart
+        self.chart_ready()
+        chart.append(2, 2)
+        chart.append(6, 4)
+        self.javascript("Plotly.relayout('chart', {'xaxis.range': [0.5, 1.5]}) && true")
+        self.javascript("Plotly.restyle('chart', {visible: 'legendonly'}, [0]) && true")
+        chart.append(4, 4)
+        rendered = self.javascript("({data: document.getElementById('chart').data, layout: document.getElementById('chart').layout})")
+        self.assertEqual(rendered['data'][0]['y'], [2, 6, 4])
+        self.assertEqual(rendered['data'][0]['visible'], 'legendonly')
+        self.assertEqual(rendered['layout']['xaxis']['range'], [0.5, 1.5])
+        old_width = self.javascript("document.getElementById('chart')._fullLayout.width")
+        self.window.resize(1400, 800)
+        process_events(300)
+        self.assertGreater(self.javascript("document.getElementById('chart')._fullLayout.width"), old_width)
+        chart.reset()
+        chart.append(1, 1)
+        rendered = self.javascript("({data: document.getElementById('chart').data, layout: document.getElementById('chart').layout})")
+        self.assertEqual(rendered['data'][0]['x'], [1])
+        self.assertEqual(rendered['data'][0]['y'], [1])
+        self.assertEqual(rendered['data'][1]['y'], [1])
+        self.assertNotEqual(rendered['data'][0].get('visible'), 'legendonly')
+        self.assertTrue(rendered['layout']['xaxis']['autorange'])
+
+    def test_chart_render_failure_is_visible(self):
+        self.chart_ready()
+        self.javascript("(trainingChart.replace(null, [], 1), true)")
+        chart = self.window.chart
+        self.assertTrue(wait_until(lambda: chart.error is not None))
+        self.assertFalse(chart.ready)
+        self.assertTrue(chart.view.isHidden())
+        self.assertIn('Training chart unavailable:', chart.status.text())
+        self.assertIn(chart.error, chart.status.text())
+
+    def test_chart_escapes_localized_labels(self):
+        self.window.chart.deleteLater()
+        process_events(10)
+        label = '<b>Score</b> & "mean" </script>'
+        chart = TrainingChart(lambda key: label)
+        self.window.chart = chart
+        self.window.setCentralWidget(chart)
+        self.chart_ready()
+        self.assertEqual(self.javascript("document.querySelector('.gtitle').textContent"), label)
 
     def test_human_controls_pause_reversal_and_resize(self):
         self.window.speed.setValue(1)

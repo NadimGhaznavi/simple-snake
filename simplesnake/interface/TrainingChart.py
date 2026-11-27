@@ -1,45 +1,102 @@
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
+import json
+from pathlib import Path
 
-from simplesnake.constants.DDisplay import DDisplay
+from PySide6.QtCore import QTimer, QUrl, Qt
+from PySide6.QtWebChannel import QWebChannel
+from PySide6.QtWebEngineCore import QWebEngineSettings
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+
+from simplesnake.constants.DChart import DChart
 from simplesnake.constants.DText import DText
+from simplesnake.interface.TrainingChartBridge import TrainingChartBridge
 
 
-class TrainingChart(FigureCanvasQTAgg):
-    """One embedded figure, updated only when a training game completes."""
+class TrainingChart(QWidget):
+    """An offline Plotly chart, updated only when a training game completes."""
 
     def __init__(self, text, parent=None):
-        figure = Figure(figsize=(4, 4), dpi=DDisplay.CHART_DPI, layout="constrained")
-        super().__init__(figure)
-        self.setParent(parent)
-        self.axes = figure.add_subplot()
-        self.axes.set_title(text(DText.CHART_TITLE))
-        self.axes.set_xlabel(text(DText.CHART_GAMES))
-        self.axes.set_ylabel(text(DText.CHART_SCORE))
-        self.score_line, = self.axes.plot([], [], label=text(DText.CHART_SCORE), alpha=0.6)
-        self.mean_line, = self.axes.plot([], [], label=text(DText.CHART_MEAN), linewidth=2)
-        self.axes.legend(loc="upper left")
-        self.axes.grid(alpha=0.2)
+        super().__init__(parent)
+        self.text = text
         self.scores = []
         self.means = []
-        self.reset()
+        self.ready = False
+        self.error = None
+        self._revision = 0
+        assets = Path(__file__).resolve().parents[1] / DChart.ASSET_DIRECTORY
+        for name in (DChart.PAGE_FILE, DChart.SCRIPT_FILE, DChart.PLOTLY_FILE):
+            if not (assets / name).is_file():
+                raise FileNotFoundError(assets / name)
+
+        self.status = QLabel(text(DText.CHART_LOADING))
+        self.status.setTextFormat(Qt.TextFormat.PlainText)
+        self.status.setWordWrap(True)
+        self.view = QWebEngineView(self)
+        self.view.settings().setAttribute(
+            QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, False)
+        self.bridge = TrainingChartBridge(self)
+        self.bridge.ready.connect(self._rendered)
+        self.bridge.failed.connect(self._failed)
+        self.channel = QWebChannel(self.view.page())
+        self.channel.registerObject("chart", self.bridge)
+        self.view.page().setWebChannel(self.channel)
+        self.view.loadFinished.connect(self._loaded)
+        self.view.renderProcessTerminated.connect(
+            lambda status, code: self._failed(f"{status.name} ({code})"))
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.status)
+        layout.addWidget(self.view, 1)
+        self._load_timer = QTimer(self)
+        self._load_timer.setSingleShot(True)
+        self._load_timer.timeout.connect(
+            lambda: self._failed(text(DText.CHART_TIMEOUT)))
+        self._load_timer.start(DChart.READY_TIMEOUT_MS)
+        self.view.load(QUrl.fromLocalFile(str(assets / DChart.PAGE_FILE)))
+
+    def _loaded(self, success):
+        if not success:
+            self._failed(self.text(DText.CHART_LOAD_FAILED))
+            return
+        labels = {
+            "title": self.text(DText.CHART_TITLE),
+            "games": self.text(DText.CHART_GAMES),
+            "score": self.text(DText.CHART_SCORE),
+            "mean": self.text(DText.CHART_MEAN),
+        }
+        self._run("initialize", labels, DChart.PLOTLY_VERSION)
+
+    def _rendered(self):
+        if self.error is not None:
+            return
+        self._load_timer.stop()
+        self.ready = True
+        self.status.hide()
+        # Games may finish before the browser has loaded. Send the current
+        # session once, then append each subsequent completed game.
+        self._run("replace", self.scores, self.means, self._revision)
+
+    def _failed(self, message):
+        self._load_timer.stop()
+        self.ready = False
+        self.error = message
+        self.view.hide()
+        self.status.setText(self.text(DText.CHART_ERROR, error=message))
+        self.status.show()
 
     def reset(self):
         self.scores.clear()
         self.means.clear()
-        self._redraw()
+        self._revision += 1
+        if self.ready:
+            self._run("replace", self.scores, self.means, self._revision)
 
     def append(self, score, mean):
         self.scores.append(score)
         self.means.append(mean)
-        self._redraw()
+        if self.ready:
+            self._run("append", score, mean)
 
-    def _redraw(self):
-        games = range(1, len(self.scores) + 1)
-        self.score_line.set_data(games, self.scores)
-        self.mean_line.set_data(games, self.means)
-        self.axes.relim()
-        self.axes.autoscale_view()
-        self.axes.set_xlim(0, max(1, len(self.scores)))
-        self.axes.set_ylim(bottom=0, top=max(1, max(self.scores, default=0) * 1.1))
-        self.draw_idle()
+    def _run(self, method, *arguments):
+        values = ",".join(json.dumps(value, allow_nan=False) for value in arguments)
+        self.view.page().runJavaScript(f"trainingChart.{method}({values})")

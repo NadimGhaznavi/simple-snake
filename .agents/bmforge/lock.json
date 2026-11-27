@@ -29,6 +29,11 @@
       "sha256": "c028d7249bd639e1aea024e16fe6b384cdf48be8a39378a65de4e02a5fa28279",
       "source_commit": "7554b12a17332876f69d845fa752c4945cf6a3a0",
       "spec_version": "0.1.0"
+    },
+    "bmforge-visualization": {
+      "sha256": "c40c4c0fac84bb0846ddbc0a2b5bf59ad802c0b2646c1a757b9696e7dc23e8ac",
+      "source_commit": "7554b12a17332876f69d845fa752c4945cf6a3a0",
+      "spec_version": "0.1.0"
     }
   },
   "source_commit": "7554b12a17332876f69d845fa752c4945cf6a3a0"
