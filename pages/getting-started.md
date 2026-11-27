@@ -14,6 +14,7 @@ Run Simple Snake from its source folder if you want to play, watch the AI or exp
 
 - A Windows or Linux computer with a graphical desktop and a supported 64-bit Python environment.
 - [Python](https://www.python.org/downloads/) 3.12–3.15 with pip and venv. On Windows, use the standard 64-bit (x86-64) build; the commands below use 3.15. Python 3.13 has been tested on Linux. Check with `py -3.15 --version` on Windows or `python3 --version` on Linux.
+- On Windows, the latest [Microsoft Visual C++ x64 Redistributable](https://aka.ms/vc14/vc_redist.x64.exe), required by PyTorch. Install it or choose **Repair**, and restart Windows if requested. For a PyTorch DLL error such as `[WinError 126]` loading `shm.dll`, see [installation recovery]({{ site.baseurl }}{% link pages/installation.md %}#recover-from-a-pytorch-dll-error).
 - Internet access for the initial dependency download, sufficient free disk space for Python packages (including PyTorch), and a writable folder.
 - The project source: open the [GitHub repository](https://github.com/{{ site.repository }}), select the desired branch or release, choose **Code → Download ZIP**, and extract it. Git is optional.
 

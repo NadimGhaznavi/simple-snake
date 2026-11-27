@@ -24,6 +24,12 @@ REQUIREMENTS_FILE = "requirements.txt"
 VENV_DIR = ".venv"
 # Use the host interpreter, never an activated development checkout venv.
 SYSTEM_PYTHON = str(Path(sys._base_executable).resolve())
+WINDOWS_RUNTIME_DLLS = ("vcruntime140.dll", "msvcp140.dll", "vcruntime140_1.dll")
+WINDOWS_RUNTIME_URL = "https://aka.ms/vc14/vc_redist.x64.exe"
+WINDOWS_RUNTIME_PROBE = (
+    'from ctypes import WinDLL; from sys import argv; '
+    '[WinDLL(name) for name in argv[1:]]'
+)
 # Adapt to the deployed application's service/client imports when enabling deployment.
 RUNTIME_IMPORTS = ("simplesnake.__main__", "simplesnake.interface.MainWindow",
                    "simplesnake.activity.TrainingSession", "PySide6.QtWebEngineWidgets",
@@ -220,6 +226,22 @@ class Installation:
         self.run([SYSTEM_PYTHON, '-B', '-c', 'import venv, ensurepip'],
                  check=True, env=self.python_environment(), capture_output=True,
                  text=True, timeout=30)
+        if sys.platform == 'win32':
+            # Probe the same C++ runtime DLLs that PyTorch's Windows loader needs.
+            # https://docs.pytorch.org/docs/stable/notes/windows.html#installation
+            try:
+                self.run([SYSTEM_PYTHON, '-B', '-c', WINDOWS_RUNTIME_PROBE,
+                          *WINDOWS_RUNTIME_DLLS], check=True,
+                         env=self.python_environment(), capture_output=True,
+                         text=True, timeout=30)
+            except subprocess.CalledProcessError as error:
+                raise ValueError(
+                    'The Microsoft Visual C++ x64 runtime could not be loaded. '
+                    f'Install or repair the latest redistributable: {WINDOWS_RUNTIME_URL}\n'
+                    'Restart Windows if its installer requests it, then rerun the same '
+                    'Simple Snake install or upgrade command. No application files were changed.\n'
+                    f'{error.stderr or error}'
+                ) from error
 
     def prepare_python(self) -> None:
         if REQUIREMENTS_FILE is None:
