@@ -1,4 +1,13 @@
-# Application structure
+---
+title: "Application structure"
+lang: en
+locale: en-US
+language_name: English
+translation_key: simple-snake-architecture
+permalink: /docs/architecture.html
+classes: wide
+author_profile: true
+---
 
 The application uses BMForge's Activity / Interface / Entity responsibilities.
 Each substantial class has its own module. There is no runtime framework
@@ -71,3 +80,7 @@ the canonical CMDB constants remain readable in either deployment.
 There are no services, listeners, databases, hidden production changes, or
 automatic releases. The source-file installer is not a frozen executable or
 MSI package. Native Windows platform integration will be validated in the VM.
+
+---
+
+[Documentation index]({{ site.baseurl }}{% link index.md %})
