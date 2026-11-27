@@ -10,6 +10,17 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-27 @ 03:30
+
+### Summary
+
+Restore the BMForge documentation configuration while preserving the existing page content and URLs.
+
+### Fixed
+
+- Enable English-default multilingual documentation support and apply the single layout, wide content and author profile defaults to pages as well as posts.
+- Exclude application source and tooling from the site output and make the dedication image URL baseurl-aware.
+
 ## [0.2.0] - 2026-11-27 @ 03:25
 
 ### Summary
