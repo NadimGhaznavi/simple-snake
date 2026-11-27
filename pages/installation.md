@@ -41,7 +41,7 @@ The default destination is `%LOCALAPPDATA%\Programs\SimpleSnake`. Launch the ins
 & "$env:LOCALAPPDATA\Programs\SimpleSnake\scripts\run.cmd"
 ```
 
-Or double-click its `scripts\run.cmd` in File Explorer. Native Windows desktop validation remains pending.
+Or double-click its `scripts\run.cmd` in File Explorer. The source folder's `scripts\run.cmd` also finds this default installation when the source has no `.venv`. If you installed with `--destination`, use `scripts\run.cmd` inside that destination. A launcher beside a local `.venv` uses that environment first. Native Windows desktop validation remains pending.
 
 ### Recover from a PyTorch DLL error
 
