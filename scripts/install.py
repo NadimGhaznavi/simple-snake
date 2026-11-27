@@ -26,15 +26,28 @@ VENV_DIR = ".venv"
 SYSTEM_PYTHON = str(Path(sys._base_executable).resolve())
 # Adapt to the deployed application's service/client imports when enabling deployment.
 RUNTIME_IMPORTS = ("simplesnake.__main__", "simplesnake.interface.MainWindow",
-                   "simplesnake.activity.TrainingSession", "PySide6", "matplotlib", "numpy", "torch")
-RUNTIME_PROBE = (
-    'from PySide6.QtWidgets import QApplication; '
-    'from simplesnake.interface.MainWindow import MainWindow; '
-    'from simplesnake.interface.Localizer import Localizer; '
-    'app = QApplication([]); '
-    'window = MainWindow(Localizer("simplesnake/locales").text); '
-    'window.show(); app.processEvents(); window.close()'
-)
+                   "simplesnake.activity.TrainingSession", "PySide6.QtWebEngineWidgets",
+                   "PySide6.QtWebChannel", "numpy", "torch")
+RUNTIME_PROBE = '''
+from PySide6.QtCore import QEventLoop, QTimer
+from PySide6.QtWidgets import QApplication
+from simplesnake.constants.DChart import DChart
+from simplesnake.interface.MainWindow import MainWindow
+from simplesnake.interface.Localizer import Localizer
+
+app = QApplication([])
+window = MainWindow(Localizer("simplesnake/locales").text)
+window.show()
+loop = QEventLoop()
+window.chart.bridge.ready.connect(loop.quit)
+window.chart.bridge.failed.connect(loop.quit)
+QTimer.singleShot(DChart.READY_TIMEOUT_MS, loop.quit)
+loop.exec()
+ready, error = window.chart.ready, window.chart.error
+window.close()
+app.processEvents()
+assert ready, error or "The bundled training chart did not render"
+'''
 MANIFEST = ".installation-manifest.json"
 VERSION_MARKER = ".deployment-version"
 
@@ -222,6 +235,8 @@ class Installation:
         if RUNTIME_PROBE:
             probe_environment = environment.copy()
             probe_environment['QT_QPA_PLATFORM'] = 'offscreen'
+            probe_environment.setdefault('QT_QUICK_BACKEND', 'software')
+            probe_environment.setdefault('QTWEBENGINE_CHROMIUM_FLAGS', '--disable-gpu')
             self.run([str(python), '-B', '-c', RUNTIME_PROBE], check=True,
                      cwd=self.destination, env=probe_environment, timeout=60)
 

@@ -10,6 +10,20 @@ author_profile: true
 
 ## [Unreleased]
 
+### Summary
+
+Make the training chart interactive with an offline Plotly.js view embedded in the desktop window.
+
+### Changed
+
+- Replace Matplotlib with locally bundled Plotly.js 4.1.1 in Qt WebEngine, preserving completed-game scores, cumulative means and session resets while adding hover values, zoom, pan and legend toggles.
+- Package chart assets and the Plotly MIT license, remove the Matplotlib dependency, and verify chart rendering during installation.
+- Record the approved desktop embedding and offline asset delivery adaptations to the BMForge visualization contract.
+
+### Fixed
+
+- Keep the disposable installation test's version fixture independent of the current application release.
+
 ## [0.2.1] - 2026-11-27 @ 03:30
 
 ### Summary

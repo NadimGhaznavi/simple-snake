@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' qrc: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'">
+  <style>
+    html, body, #chart { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #141c26; }
+  </style>
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+  <script src="plotly-4.1.1.min.js"></script>
+  <script src="training-chart.js"></script>
+</head>
+<body><div id="chart"></div></body>
+</html>

@@ -17,7 +17,7 @@ Use the [source setup]({{ site.baseurl }}{% link pages/getting-started.md %}) to
 - Internet access for the initial dependency download, sufficient free disk space for Python packages (including PyTorch), and a writable folder.
 - The project source: open the [GitHub repository](https://github.com/{{ site.repository }}), select the desired branch or release, choose **Code → Download ZIP**, and extract it. Git is optional.
 
-**Do I need to install Qt?** No. PySide6's pip wheels include the Qt binaries ([Qt for Python installation guide](https://doc.qt.io/qtforpython-6/gettingstarted.html)). The project's requirements install PySide6, Matplotlib, NumPy and CPU PyTorch into a private Python environment. You do not need a separate Qt SDK, Qt Creator, CUDA or a dedicated GPU.
+**Do I need to install Qt?** No. PySide6's pip wheels include Qt and Qt WebEngine ([Qt for Python installation guide](https://doc.qt.io/qtforpython-6/gettingstarted.html)). The project's requirements install PySide6, NumPy and CPU PyTorch into a private Python environment. Plotly.js is bundled with the application, so the chart works offline. You do not need a separate Qt SDK, Qt Creator, CUDA or a dedicated GPU.
 
 On Linux, Qt may still require system-level graphical libraries, such as XCB dependencies. Install the library named in any Qt startup error through your distribution's package manager. Some Linux distributions also package Python's venv support separately.
 
