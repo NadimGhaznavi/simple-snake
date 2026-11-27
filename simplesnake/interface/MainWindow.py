@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, text):
         super().__init__()
+        # Store the supplied translation function so callbacks can translate later.
         self.text = text
         self.game = SnakeGame()
         self.pending_direction = self.game.direction
@@ -34,6 +35,7 @@ class MainWindow(QMainWindow):
         self.resize(DDisplay.WINDOW_WIDTH, DDisplay.WINDOW_HEIGHT)
 
         self.mode = QComboBox()
+        # Each choice pairs a translated label with a stable value (currentData()).
         self.mode.addItem(text(DText.HUMAN), DMode.HUMAN)
         self.mode.addItem(text(DText.TRAIN), DMode.TRAIN)
         self.toggle = QPushButton(text(DText.START))
@@ -52,6 +54,7 @@ class MainWindow(QMainWindow):
         controls.addWidget(QLabel(text(DText.SPEED)))
         controls.addWidget(self.speed)
 
+        # Create four distinct labels; _ means the loop number is unused.
         self.stats = [QLabel() for _ in range(4)]
         stats = QHBoxLayout()
         for label in self.stats:
@@ -75,6 +78,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         self.timer = QTimer(self)
+        # connect passes a function to Qt to call later; () would call it now.
         self.timer.timeout.connect(self._human_step)
         self.toggle.clicked.connect(self._toggle)
         self.reset.clicked.connect(self._reset)
@@ -86,6 +90,8 @@ class MainWindow(QMainWindow):
         ):
             for key in keys:
                 shortcut = QShortcut(QKeySequence(key), self)
+                # Capture this iteration's direction in a default argument.
+                # https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result
                 shortcut.activated.connect(lambda d=direction: self._steer(d))
         shortcut = QShortcut(QKeySequence("Space"), self)
         shortcut.setAutoRepeat(False)
@@ -98,6 +104,7 @@ class MainWindow(QMainWindow):
             self.text(DText.SCORE, score=score), self.text(DText.GAMES, games=games),
             self.text(DText.RECORD, record=record), self.text(DText.MEAN, mean=f"{mean:.2f}"),
         )
+        # zip pairs each label with the corresponding formatted statistic.
         for label, value in zip(self.stats, values):
             label.setText(value)
 
@@ -117,6 +124,7 @@ class MainWindow(QMainWindow):
                 self.worker = TrainingWorker(self.model_path, self.speed.value(), self)
                 self.worker.progress.connect(self._training_progress)
                 self.worker.failed.connect(self._training_failed)
+                # start runs the worker's run() in another thread, keeping Qt responsive.
                 self.worker.start()
             else:
                 self.worker.set_paused(False)
@@ -161,6 +169,7 @@ class MainWindow(QMainWindow):
 
     @Slot(object)
     def _training_progress(self, progress):
+        # @Slot registers a Qt callback; queued worker results arrive on the UI thread.
         # A stopped worker may have already queued a final signal.
         if self.sender() is not self.worker:
             return
@@ -170,6 +179,8 @@ class MainWindow(QMainWindow):
             self.chart.append(progress.completed_score, progress.mean)
 
     def _stop_training(self):
+        # Both right-hand values are read first: keep the old worker, then detach it.
+        # https://docs.python.org/3/reference/simple_stmts.html#assignment-statements
         worker, self.worker = self.worker, None
         if worker is not None:
             worker.stop()

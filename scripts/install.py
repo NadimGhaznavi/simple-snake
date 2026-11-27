@@ -53,6 +53,8 @@ VERSION_MARKER = ".deployment-version"
 
 
 def relative_path(name: str) -> str:
+    # Pure paths inspect path syntax without accessing files on the host system.
+    # https://docs.python.org/3/library/pathlib.html#pure-paths
     if not isinstance(name, str):
         raise ValueError("Managed paths must be strings")
     path = PurePosixPath(name)
@@ -65,6 +67,7 @@ def relative_path(name: str) -> str:
 
 
 def reject_symlinks(path: Path) -> None:
+    # *path.parents expands the ancestor paths so we check every directory too.
     for candidate in (path, *path.parents):
         if candidate.is_symlink():
             raise ValueError(f"Refusing a symbolic link in deployment path: {candidate}")
@@ -76,6 +79,8 @@ class Installation:
         self.checkout = checkout.resolve()
         self.run = run or subprocess.run
         self.version_file = f"{PROJECT_NAME.lower()}/constants/D{PROJECT_NAME}.py"
+        # Load the checker by filename: its hyphen is not valid in a normal import.
+        # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
         spec = importlib.util.spec_from_file_location('cmdb_checker', self.checkout / 'scripts/check-cmdb.py')
         checker = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(checker)
@@ -90,6 +95,7 @@ class Installation:
             raise ValueError("Run deployment from a separate checkout outside the installation")
 
     def installed_files(self) -> list[str] | None:
+        # The manifest lists files we own; None means no installation was found.
         manifest = self.destination / MANIFEST
         reject_symlinks(manifest)
         if not manifest.exists():
@@ -122,6 +128,7 @@ class Installation:
             reject_symlinks(folder)
             if not folder.is_dir():
                 raise ValueError(f"Missing source directory: {name}")
+            # rglob walks nested folders; generated caches are not deployment sources.
             for path in folder.rglob('*'):
                 if '__pycache__' in path.parts or VENV_DIR in path.parts or path.suffix in ('.pyc', '.pyo'):
                     continue
@@ -164,6 +171,7 @@ class Installation:
 
     @staticmethod
     def python_environment() -> dict[str, str]:
+        # Copy before removing variables so the installer's own environment is unchanged.
         environment = os.environ.copy()
         for variable in ('PYTHONPATH', 'PYTHONHOME', 'VIRTUAL_ENV',
                          'PIP_TARGET', 'PIP_PREFIX', 'PIP_USER'):
@@ -207,6 +215,8 @@ class Installation:
             raise ValueError('SYSTEM_PYTHON must be a host interpreter outside development and deployed environments')
         if shutil.which(SYSTEM_PYTHON) is None:
             raise ValueError(f'Missing host Python interpreter: {SYSTEM_PYTHON}')
+        # Arguments are separate list items; check=True raises on a failed command.
+        # https://docs.python.org/3/library/subprocess.html#subprocess.run
         self.run([SYSTEM_PYTHON, '-B', '-c', 'import venv, ensurepip'],
                  check=True, env=self.python_environment(), capture_output=True,
                  text=True, timeout=30)
@@ -218,6 +228,8 @@ class Installation:
         python = self.python_path()
         environment = self.python_environment()
         if not venv.exists():
+            # A virtual environment keeps deployed dependencies separate from the host.
+            # https://docs.python.org/3/library/venv.html
             self.run([SYSTEM_PYTHON, '-m', 'venv', str(venv)],
                      check=True, env=environment, timeout=120)
         self.run([str(python), '-m', 'pip', 'install', '--upgrade',
@@ -246,9 +258,13 @@ class Installation:
             if directory == self.destination.parent:
                 break
             directory.chmod(0o755)
+        # Create beside the target so replace() can rename on the same filesystem.
+        # mkstemp returns an open file descriptor and its path.
+        # https://docs.python.org/3/library/tempfile.html#tempfile.mkstemp
         descriptor, name = tempfile.mkstemp(prefix='.bmforge-install-', dir=path.parent)
         temporary = Path(name)
         try:
+            # fdopen wraps that descriptor in a stream; with closes it after writing.
             with os.fdopen(descriptor, 'wb') as stream:
                 stream.write(content)
             temporary.chmod(mode)
@@ -264,11 +280,13 @@ class Installation:
                 if directory == self.destination:
                     break
                 try:
+                    # rmdir removes only empty folders, preserving any unowned content.
                     directory.rmdir()
                 except OSError:
                     break
 
     def apply(self, action: str, *, check: bool = False) -> None:
+        # Validate the whole plan before creating, replacing, or removing files.
         previous, names = self.plan(action)
         if check:
             print(f"{action}: checks passed for {self.destination}; no files changed.")
@@ -303,9 +321,11 @@ class Installation:
         # Existing managed files may change before success; this is not rollback.
         for name in names:
             source = self.checkout / name
+            # Octal permission bits preserve executability for copied launch scripts.
             mode = 0o755 if source.stat().st_mode & 0o111 else 0o644
             self.atomic_write(self.destination / name, source.read_bytes(), mode)
         self.prepare_python()
+        # Set subtraction identifies files owned by the old release but absent now.
         self.remove_files(sorted(set(previous or ()) - set(names)))
         ownership['files'] = names
         self.atomic_write(self.destination / MANIFEST, (json.dumps(ownership, indent=2) + '\n').encode())

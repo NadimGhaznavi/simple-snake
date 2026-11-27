@@ -26,6 +26,7 @@ def make_wheel(directory, version):
         f'{info}/WHEEL': 'Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: true\nTag: py3-none-any\n',
     }
     files[f'{info}/RECORD'] = ''.join(f'{name},,\n' for name in [*files, f'{info}/RECORD'])
+    # A wheel is a ZIP archive containing package files and installation metadata.
     with zipfile.ZipFile(wheel, 'w') as archive:
         for name, content in files.items():
             archive.writestr(name, content)
@@ -54,15 +55,19 @@ class InstallationTests(unittest.TestCase):
         self.wheel = make_wheel(self.base, '1.0')
         self.requirements = self.source / 'requirements.txt'
         self.requirements.write_text(f'--no-index\n{self.wheel.as_posix()}\n')
+        # Swap installer settings for a tiny dependency that pip can install offline.
         self.settings = patch.multiple(installer, COPY_FILES=(),
                                        RUNTIME_IMPORTS=('simplesnake.constants.DSimpleSnake', 'snake_fixture'),
                                        RUNTIME_PROBE='import snake_fixture; assert snake_fixture.VERSION == "1.0"')
         self.settings.start()
+        # Cleanups run even if a test fails, restoring settings and removing test files.
+        # https://docs.python.org/3/library/unittest.html#unittest.TestCase.addCleanup
         self.addCleanup(self.settings.stop)
         self.addCleanup(self.temporary.cleanup)
         self.installation = installer.Installation(self.source, destination=self.destination, run=real_run)
 
     def apply(self, action, **kwargs):
+        # Capture routine installer output so the test runner stays readable.
         with contextlib.redirect_stdout(io.StringIO()):
             self.installation.apply(action, **kwargs)
 

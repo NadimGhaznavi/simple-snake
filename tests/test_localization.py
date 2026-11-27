@@ -19,6 +19,7 @@ class LocalizationTests(unittest.TestCase):
             localizer.text('missing.key')
 
     def test_translation_fallback_precedence_and_sibling_languages(self):
+        # Tiny temporary catalogues isolate language matching from bundled translations.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)
             for tag, messages in {

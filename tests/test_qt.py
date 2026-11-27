@@ -1,4 +1,6 @@
 import os
+# Set Qt's headless options before importing its modules; setdefault keeps overrides.
+# https://docs.python.org/3/library/stdtypes.html#dict.setdefault
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 os.environ.setdefault('QT_QUICK_BACKEND', 'software')
 os.environ.setdefault('QTWEBENGINE_CHROMIUM_FLAGS', '--disable-gpu')
@@ -22,6 +24,7 @@ from simplesnake.interface.TrainingChart import TrainingChart
 from simplesnake.interface.TrainingWorker import TrainingWorker
 
 
+# Qt permits one application object; reuse it if another test already created one.
 APP = QApplication.instance() or QApplication([])
 
 
@@ -33,6 +36,7 @@ def process_events(milliseconds):
 
 
 def wait_until(predicate, timeout=10000):
+    # predicate is a function we repeatedly call while giving Qt time to deliver events.
     deadline = monotonic() + timeout / 1000
     while not predicate() and monotonic() < deadline:
         process_events(10)
@@ -55,6 +59,7 @@ class QtTests(unittest.TestCase):
 
     def javascript(self, expression):
         results = []
+        # JavaScript finishes asynchronously; its callback appends the returned value.
         self.window.chart.view.page().runJavaScript(
             f'JSON.stringify({expression})', results.append)
         self.assertTrue(wait_until(lambda: bool(results)))
@@ -167,6 +172,8 @@ class QtTests(unittest.TestCase):
 
     @patch('simplesnake.activity.Agent.Agent.choose_action', return_value=DAction.STRAIGHT)
     def test_training_chart_pause_resume_reset_and_shutdown(self, choose_action):
+        # patch temporarily fixes AI choices and injects a mock as choose_action.
+        # https://docs.python.org/3/library/unittest.mock.html#patch
         self.window.mode.setCurrentIndex(1)
         self.window.speed.setValue(120)
         self.window._toggle()

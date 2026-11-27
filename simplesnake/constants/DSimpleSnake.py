@@ -2,11 +2,12 @@ from typing import Final
 
 
 class DSimpleSnake:
-    VERSION: Final[str] = "0.3.0"
+    # Release and installation tools read these literal values without importing us.
+    VERSION: Final[str] = "0.4.0"
     CMDB_TYPE: Final[str] = "application"
     CMDB_SUBTYPE: Final[str] = "Application"
     CMDB_SUPPLIER: Final[str] = "Nadim-Daniel"
-    CMDB_CODENAME: Final[str] = "Xanthosoma"
+    CMDB_CODENAME: Final[str] = "Yam"
     CMDB_COMPONENTS = (("localization", "simplesnake/interface/Localizer.py"),)
     CMDB_DATABASES = ()
     CMDB_NETWORK: Final[tuple] = ()

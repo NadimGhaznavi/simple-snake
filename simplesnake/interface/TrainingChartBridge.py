@@ -9,6 +9,7 @@ class TrainingChartBridge(QObject):
 
     @Slot()
     def rendered(self):
+        # JavaScript calls this slot; the signal notifies the Python chart widget.
         self.ready.emit()
 
     @Slot(str)

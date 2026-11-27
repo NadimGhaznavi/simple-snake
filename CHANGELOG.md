@@ -10,6 +10,8 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-27 @ 04:50
+
 ## [0.3.0] - 2026-11-27 @ 03:57
 
 ### Summary

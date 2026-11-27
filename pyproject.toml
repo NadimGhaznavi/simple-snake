@@ -7,7 +7,7 @@ name = "simple-snake"
 version = "0.0.0"
 description = "A small PySide6 Snake game with embedded AI training charts"
 readme = "README.md"
-requires-python = ">=3.12,<3.15"
+requires-python = ">=3.12,<3.16"
 license = "GPL-3.0-or-later"
 dependencies = [
     "PySide6>=6.8,<7",

@@ -9,13 +9,31 @@ classes: wide
 author_profile: true
 ---
 
-The AI has a surprisingly small brain: 11 inputs, one hidden layer of 256 neurons with a ReLU activation, and three outputs predicting the value of moving straight, turning right or turning left. It learns by updating those predictions using rewards and future value estimates.
+## Overview
+
+The AI has a surprisingly small brain: 11 inputs, one hidden layer of 256 neurons with a ReLU activation, and three outputs predicting the value of moving straight, turning right or turning left. It learns by updating those predictions using rewards and future value estimates. For an introduction to neural networks, have a look at this excellent [3Blue1Brown youtube video](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi), heads up it's 18:40 long.
+
+### How the application starts
+
+On Linux, launch the application from the project directory with:
+
+```bash
+./scripts/run.sh
+```
+
+The startup path connects the launcher to the Python classes:
+
+1. [scripts/run.sh](https://github.com/{{ site.repository }}/blob/main/scripts/run.sh) changes to the project directory and runs `.venv/bin/python -B -m simplesnake`. It uses the virtual environment's Python directly, so a separate activation step is unnecessary.
+2. `-m simplesnake` tells Python to run the `simplesnake` package through [simplesnake/__main__.py](https://github.com/{{ site.repository }}/blob/main/simplesnake/__main__.py). Its `main()` function creates the Qt application, shows the window, and starts the event loop that handles user input.
+3. The window class, `MainWindow`, lives in [simplesnake/interface/MainWindow.py](https://github.com/{{ site.repository }}/blob/main/simplesnake/interface/MainWindow.py). It creates a `SnakeGame` instance from [simplesnake/activity/SnakeGame.py](https://github.com/{{ site.repository }}/blob/main/simplesnake/activity/SnakeGame.py), which contains the game rules. `simplesnake` is the package name; `SnakeGame` is the game class.
+
+## Changing the brain
 
 If you want to try changing the brain or its rewards first, start with [AI experiments]({{ site.baseurl }}{% link pages/experiments.md %}). The rest of this page explains the implementation.
 
-The application uses BMForge's Activity / Interface / Entity responsibilities.
-Each substantial class has its own module. There is no runtime framework
-beyond Qt, Plotly.js, NumPy, and PyTorch.
+## Python class organization
+
+The application categorizes its classes into *Activity*, *Interface*, and *Entity* categories.
 
 | Package | Owns |
 | --- | --- |
