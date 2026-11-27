@@ -16,6 +16,12 @@ The Qt presentation and application structure are maintained by this project.
 The original MIT notice is reproduced below. The project license is in
 [LICENSE](https://github.com/{{ site.repository }}/blob/main/LICENSE).
 
+## Dedication
+
+This project is dedicated to my daughter Madeline, who inspired me to create a simple snake game for her to play with. I hope she enjoys it and learns from it.
+
+![Madeline and Me](/pages/images/madeline.jpg)
+
 ## Patrick Loeber's Snake AI (MIT)
 
 MIT License
