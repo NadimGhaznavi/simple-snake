@@ -12,7 +12,7 @@ author_profile: true
 
 ### Summary
 
-Port the AI Snake game to a portable Qt desktop application with clear game and learning modules following the pinned BMForge standards. The GitHub Pages documentation now guides players from installation to hands-on reinforcement-learning experiments.
+Port the AI Snake game to a portable Qt desktop application with clear game and learning modules following the pinned BMForge standards. The GitHub Pages documentation now guides players from installation to hands-on reinforcement-learning experiments, and a project-branded script supports publishing releases.
 
 ### Fixed
 
@@ -25,6 +25,7 @@ Port the AI Snake game to a portable Qt desktop application with clear game and 
 
 ### Added
 
+- Adapt the release script for Simple Snake, preserving version/codename updates, changelog versioning, feature-to-dev-to-main merges, annotated tags, atomic pushes, and creation of the next feature branch.
 - BMForge GitHub Pages site using the shared dark Minimal Mistakes theme, the supplied project logo, English translation metadata, explicit wide layout and author profile on every site page, and a main-only GitHub Actions publishing workflow.
 - Website guides preserving the source setup, controls/training, installation lifecycle, development, architecture, and license documentation; restore the original short README linking to the website.
 
