@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import zipfile
 
 from scripts import install as installer
@@ -122,6 +122,59 @@ class InstallationTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.apply('install', check=check)
                 self.assertFalse(self.destination.exists())
+
+    def windows_runtime_run(self, command, **kwargs):
+        if installer.WINDOWS_RUNTIME_PROBE in command:
+            raise subprocess.CalledProcessError(
+                1, command, stderr='OSError: msvcp140.dll: [WinError 126]')
+        return real_run(command, **kwargs)
+
+    def test_missing_windows_runtime_fails_before_check_or_install_changes_files(self):
+        self.installation.run = self.windows_runtime_run
+        with patch.object(installer, 'sys', Mock(platform='win32')):
+            for check in (True, False):
+                with self.subTest(check=check):
+                    with self.assertRaises(ValueError) as caught:
+                        self.apply('install', check=check)
+                    message = str(caught.exception)
+                    self.assertIn(installer.WINDOWS_RUNTIME_URL, message)
+                    self.assertIn('Restart Windows if', message)
+                    self.assertIn('msvcp140.dll', message)
+                    self.assertFalse(self.destination.exists())
+
+    def test_missing_windows_runtime_preserves_upgrade_and_allows_uninstall(self):
+        self.apply('install')
+        before = {path.relative_to(self.destination): path.read_bytes()
+                  for path in self.destination.rglob('*') if path.is_file()}
+        self.installation.run = self.windows_runtime_run
+        with patch.object(installer, 'sys', Mock(platform='win32')):
+            for check in (True, False):
+                with self.subTest(check=check), self.assertRaises(ValueError) as caught:
+                    self.apply('upgrade', check=check)
+                self.assertIn(installer.WINDOWS_RUNTIME_URL, str(caught.exception))
+            after = {path.relative_to(self.destination): path.read_bytes()
+                     for path in self.destination.rglob('*') if path.is_file()}
+            self.assertEqual(after, before)
+            self.apply('uninstall', check=True)
+            self.apply('uninstall')
+        self.assertFalse(self.destination.exists())
+
+    def test_loadable_windows_runtime_passes_read_only_preflight(self):
+        calls = []
+
+        def run(command, **kwargs):
+            if installer.WINDOWS_RUNTIME_PROBE in command:
+                calls.append(command)
+                return subprocess.CompletedProcess(command, 0, stdout='', stderr='')
+            return real_run(command, **kwargs)
+
+        self.installation.run = run
+        with patch.object(installer, 'sys', Mock(platform='win32')):
+            self.apply('install', check=True)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0][-len(installer.WINDOWS_RUNTIME_DLLS):],
+                         list(installer.WINDOWS_RUNTIME_DLLS))
+        self.assertFalse(self.destination.exists())
 
     def test_refuses_unowned_destination_and_windows_path_escapes(self):
         self.destination.mkdir()
