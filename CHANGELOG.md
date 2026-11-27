@@ -10,6 +10,8 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-27 @ 05:19
+
 ### Summary
 
 Fix launching the installed Windows game from the extracted source folder.
