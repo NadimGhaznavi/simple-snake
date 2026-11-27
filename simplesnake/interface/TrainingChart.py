@@ -37,6 +37,7 @@ class TrainingChart(QWidget):
         self.bridge = TrainingChartBridge(self)
         self.bridge.ready.connect(self._rendered)
         self.bridge.failed.connect(self._failed)
+        # The channel lets JavaScript report readiness or errors to our Python bridge.
         self.channel = QWebChannel(self.view.page())
         self.channel.registerObject("chart", self.bridge)
         self.view.page().setWebChannel(self.channel)
@@ -87,6 +88,7 @@ class TrainingChart(QWidget):
     def reset(self):
         self.scores.clear()
         self.means.clear()
+        # A new revision tells the chart to discard the old session's view settings.
         self._revision += 1
         if self.ready:
             self._run("replace", self.scores, self.means, self._revision)
@@ -98,5 +100,8 @@ class TrainingChart(QWidget):
             self._run("append", score, mean)
 
     def _run(self, method, *arguments):
+        # *arguments collects positional arguments; JSON escapes strings for JavaScript.
+        # allow_nan=False rejects numbers that JSON cannot represent.
+        # https://docs.python.org/3/library/json.html#json.dumps
         values = ",".join(json.dumps(value, allow_nan=False) for value in arguments)
         self.view.page().runJavaScript(f"trainingChart.{method}({values})")

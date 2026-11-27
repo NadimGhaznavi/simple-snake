@@ -6,6 +6,9 @@ from simplesnake.entity.Point import Point
 
 @dataclass(frozen=True)
 class GameState:
+    # Type hints describe expected values; Python does not enforce them at runtime.
+    # tuple[Point, ...] means any number of Points; Point | None allows missing food.
+    # https://docs.python.org/3/library/typing.html
     columns: int
     rows: int
     snake: tuple[Point, ...]

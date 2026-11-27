@@ -7,6 +7,8 @@ from string import Formatter
 
 
 BMFORGE_COMPONENT = {"id": "bmforge.localization", "spec_version": "0.1.0"}
+# Compile reusable validation patterns; r"..." preserves regex backslashes.
+# https://docs.python.org/3/library/re.html#re.compile
 _TAG = re.compile(r"[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*")
 _FIELD = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
@@ -22,6 +24,8 @@ def normalize(tag):
 def fields(template):
     """Allow simple named placeholders, not attribute/index expressions."""
     names = set()
+    # parse separates literal text from {name} fields; _ ignores the literal part.
+    # https://docs.python.org/3/library/string.html#string.Formatter.parse
     for _, field, format_spec, conversion in Formatter().parse(template):
         if field is None:
             continue
@@ -37,6 +41,7 @@ class Localizer:
     def __init__(self, directory, *, default_language="en"):
         self._catalogues = {}
         self._tags = {}
+        # glob finds matching files; stem is the filename without its .json suffix.
         for file in sorted(Path(directory).glob("*.json")):
             tag = normalize(file.stem)
             if tag is None or tag in self._catalogues:
@@ -57,6 +62,7 @@ class Localizer:
         for language, values in self._catalogues.items():
             if language == default:
                 continue
+            # Subtract sets of keys to find translations with no source message.
             unknown = set(values) - set(base)
             if unknown:
                 raise ValueError(f"Unexpected translation keys in {self._tags[language]}: {sorted(unknown)}")
@@ -68,6 +74,8 @@ class Localizer:
 
     @property
     def languages(self):
+        # @property exposes this method as localizer.languages, without parentheses.
+        # https://docs.python.org/3/library/functions.html#property
         return tuple(self._tags.values())
 
     def _match(self, requested):
@@ -75,6 +83,7 @@ class Localizer:
         while candidate:
             if candidate in self._catalogues:
                 return candidate
+            # Try progressively broader tags: fr-CA becomes fr, then the empty string.
             candidate = candidate.rpartition("-")[0]
         return None
 
@@ -98,6 +107,7 @@ class Localizer:
                     continue
             if not 0 < quality <= 1:
                 continue
+            # Tuples sort by each field in order: highest quality, then input position.
             preferences.append((-quality, position, parts[0]))
         for _, _, language in sorted(preferences):
             match = self._match(language)
@@ -111,4 +121,6 @@ class Localizer:
         fallback = self._catalogues[self._default][key]
         match = self._match(locale) if locale is not None else None
         message = self._catalogues[match].get(key, fallback) if match else fallback
+        # Fill {name} placeholders using the **values keyword arguments as a mapping.
+        # https://docs.python.org/3/library/stdtypes.html#str.format_map
         return message.format_map(values)

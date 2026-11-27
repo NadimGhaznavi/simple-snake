@@ -2,6 +2,8 @@ from enum import StrEnum
 
 
 class DText(StrEnum):
+    # These keys identify translated messages; the displayed words live in JSON.
+    # https://docs.python.org/3/library/enum.html#enum.StrEnum
     APP_TITLE = "app.title"
     MODE = "control.mode"
     HUMAN = "control.human"

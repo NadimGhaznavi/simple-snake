@@ -2,6 +2,7 @@ from typing import Final
 
 
 class DChart:
+    # The browser loads these bundled assets so charts work without a network.
     PLOTLY_VERSION: Final[str] = "4.1.1"
     PLOTLY_FILE: Final[str] = "plotly-4.1.1.min.js"
     ASSET_DIRECTORY: Final[str] = "assets"

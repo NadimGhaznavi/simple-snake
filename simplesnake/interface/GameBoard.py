@@ -9,6 +9,8 @@ class GameBoard(QWidget):
     """Paint an immutable game snapshot, scaled to the available space."""
 
     def __init__(self, state, parent=None):
+        # Initialize QWidget's part of this subclass before setting up our board.
+        # https://docs.python.org/3/library/functions.html#super
         super().__init__(parent)
         self.state = state
         self.setMinimumSize(DDisplay.BOARD_MIN_WIDTH, DDisplay.BOARD_MIN_HEIGHT)
@@ -19,18 +21,21 @@ class GameBoard(QWidget):
 
     def show_state(self, state):
         self.state = state
+        # Request a repaint; Qt calls paintEvent when it processes that request.
         self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.fillRect(self.rect(), QColor(DDisplay.BACKGROUND))
         state = self.state
+        # Use square cells that fit both dimensions, then center the board.
         cell = min(self.width() / state.columns, self.height() / state.rows)
         left = (self.width() - state.columns * cell) / 2
         top = (self.height() - state.rows * cell) / 2
         inset = cell * DDisplay.CELL_INSET
 
         def draw_cell(point, color):
+            # This helper reuses cell, left, top, and inset from the enclosing method.
             painter.fillRect(QRectF(left + point.x * cell + inset,
                                     top + point.y * cell + inset,
                                     cell - 2 * inset, cell - 2 * inset), QColor(color))
