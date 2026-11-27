@@ -10,6 +10,8 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-27 @ 03:25
+
 ### Summary
 
 Port the AI Snake game to a portable Qt desktop application with clear game and learning modules following the pinned BMForge standards. The GitHub Pages documentation now guides players from installation to hands-on reinforcement-learning experiments, and a project-branded script supports publishing releases.
