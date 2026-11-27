@@ -10,6 +10,15 @@ author_profile: true
 
 ## [Unreleased]
 
+### Summary
+
+Check the Windows C++ runtime before installation and explain how to recover from PyTorch DLL loading failures.
+
+### Fixed
+
+- Check that PyTorch's required Microsoft Visual C++ runtime DLLs load during Windows install and upgrade preflight, including read-only checks, with a repair link and retry instructions on failure.
+- Document the x64 redistributable prerequisite for installed and source setups, when to reboot, and how to retry a partially completed installation.
+
 ## [0.4.0] - 2026-11-27 @ 04:50
 
 ## [0.3.0] - 2026-11-27 @ 03:57

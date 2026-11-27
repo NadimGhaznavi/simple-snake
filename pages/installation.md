@@ -17,7 +17,8 @@ Use the [source setup]({{ site.baseurl }}{% link pages/getting-started.md %}) to
 
 ### Windows Prerequisites
 
-- Install [Python](https://www.python.org/downloads/).
+- Install a supported 64-bit (x86-64) [Python](https://www.python.org/downloads/) build.
+- Install the latest [Microsoft Visual C++ x64 Redistributable](https://aka.ms/vc14/vc_redist.x64.exe), required by PyTorch. If it is already installed, choose **Repair**. Restart Windows if the Microsoft installer requests it.
 
 ### Linux Prerequisites
 
@@ -41,6 +42,14 @@ The default destination is `%LOCALAPPDATA%\Programs\SimpleSnake`. Launch the ins
 ```
 
 Or double-click its `scripts\run.cmd` in File Explorer. Native Windows desktop validation remains pending.
+
+### Recover from a PyTorch DLL error
+
+If installation fails with `[WinError 126]` while loading `torch\lib\shm.dll` or one of its dependencies, a missing or damaged Visual C++ runtime is a common cause. Install or repair the x64 redistributable linked above, restart Windows if requested, then rerun the same `install` command from the source folder. A reboot alone does not install a missing runtime. The installer can reuse its owned environment and packages; you do not need to delete the installation folder.
+
+The installer checks that the required C++ runtime DLLs load before copying application files or downloading packages, including with `--check`. This prerequisite check does not verify every PyTorch DLL; the full deployed import check still runs after dependency installation. If the error persists after repairing the runtime, retain the full error output for diagnosis.
+
+### Upgrade or uninstall
 
 To upgrade, obtain the new source and run the upgrade command from that source folder. To remove the installed copy, run uninstall instead. Close the game first.
 
