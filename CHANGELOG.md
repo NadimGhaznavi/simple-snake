@@ -10,6 +10,10 @@ author_profile: true
 
 ## [Unreleased]
 
+### Fixed
+
+- Website sidebar.
+
 ### Summary
 
 Port the AI Snake game to a portable Qt desktop application, with clear game and learning modules following the pinned BMForge standards. Move the documentation to the project's GitHub Pages site.
