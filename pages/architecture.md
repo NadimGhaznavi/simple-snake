@@ -103,7 +103,8 @@ choices. A new session clears the traces and restores automatic axes.
 Labels are escaped before Plotly renders them. Load/render errors appear in
 the chart area, and installation verifies the initial browser render.
 
-The packaged assets and Plotly MIT license live in `simplesnake/assets`.
+The packaged chart assets live in `simplesnake/assets`. The Plotly MIT license
+is in [LICENSE-PLOTLY](https://github.com/{{ site.repository }}/blob/main/LICENSE-PLOTLY).
 The project-specific specification in `docs/visualization.md` records asset
 provenance and the approved adaptations without changing the pinned BMForge
 skill snapshot.

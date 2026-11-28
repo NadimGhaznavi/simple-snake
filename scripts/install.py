@@ -17,7 +17,7 @@ BMFORGE_COMPONENT = {"id": "bmforge.installation", "spec_version": "0.1.3"}
 PROJECT_NAME = "SimpleSnake"
 DEPLOYMENT_READY = True
 COPY_TREES = ("simplesnake", "scripts")
-COPY_FILES = ("README.md", "LICENSE", "THIRD_PARTY_NOTICES.md")
+COPY_FILES = ("README.md", "LICENSE", "LICENSE-MIT-LOEBER", "LICENSE-PLOTLY")
 # Set to "requirements.txt" for Python applications requiring a production venv.
 # Keep None for applications without Python package dependencies.
 REQUIREMENTS_FILE = "requirements.txt"
