@@ -1,23 +1,8 @@
-# Third-party notices
+## Patrick Loeber's Snake AI Source Code
 
-The Snake rules, 11-feature observation, exploration schedule, and Q-learning
-design are adapted from Patrick Loeber's
-[snake-ai-pytorch](https://github.com/patrickloeber/snake-ai-pytorch).
-The Qt presentation and application structure are maintained by this project.
-The original MIT notice is reproduced below. The project license is in
-[LICENSE](LICENSE).
+The basic design and flow were ported from Patrick Loeber's [snake-ai-pytorch](https://github.com/patrickloeber/snake-ai-pytorch) source code. Patrick's project is licensed under the MIT License, and the original copyright notice is reproduced below. 
 
-## Plotly.js 4.1.1 (MIT)
-
-The offline training chart bundles the unmodified
-[Plotly.js 4.1.1 distribution](https://cdn.plot.ly/plotly-4.1.1.min.js)
-in `simplesnake/assets/plotly-4.1.1.min.js`. Its accompanying MIT license is
-included in [plotly-LICENSE](simplesnake/assets/plotly-LICENSE).
-The distribution retains its bundled third-party notices.
-
-## Patrick Loeber's Snake AI (MIT)
-
-MIT License
+### MIT License
 
 Copyright (c) 2021 Patrick Loeber
 

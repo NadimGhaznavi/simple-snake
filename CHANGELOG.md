@@ -10,6 +10,15 @@ author_profile: true
 
 ## [Unreleased]
 
+### Summary
+
+Keep documentation and installation aligned with the separate third-party license files.
+
+### Fixed
+
+- Update license links and asset-location documentation for `LICENSE-MIT-LOEBER` and `LICENSE-PLOTLY`, preserving the existing credits page URL.
+- Include both third-party license files in source-file installations instead of the removed combined notices file.
+
 ## [0.4.2] - 2026-11-27 @ 05:19
 
 ### Summary
