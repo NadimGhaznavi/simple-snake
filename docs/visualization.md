@@ -23,7 +23,7 @@ the pinned upstream skill remains unchanged.
   unmodified to [plotly-4.1.1.min.js](../simplesnake/assets/plotly-4.1.1.min.js).
 - SHA-256: `3b6e15d45dbb7fca5bd2094291e961ddc5472cd887009e6009a56dab668d721f`.
 - License: [upstream v4.1.1 MIT license](https://github.com/plotly/plotly.js/blob/v4.1.1/LICENSE),
-  included as [plotly-LICENSE](../simplesnake/assets/plotly-LICENSE).
+  included as [LICENSE-PLOTLY](../LICENSE-PLOTLY).
 - Preserve the distribution's embedded third-party notices. Package the HTML,
   JavaScript and license in Python wheels and source-file deployments.
 
