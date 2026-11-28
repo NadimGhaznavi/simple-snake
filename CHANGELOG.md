@@ -10,6 +10,8 @@ author_profile: true
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-11-28 @ 03:35
+
 ### Summary
 
 Keep documentation and installation aligned with the separate third-party license files.
